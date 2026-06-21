@@ -72,6 +72,15 @@ public class FoodItem {
     @Column(name = "raw_source_json", columnDefinition = "jsonb")
     private String rawSourceJson;
 
+    @Column(name = "external_source_name", length = 100)
+    private String externalSourceName;
+
+    @Column(name = "external_source_id", length = 255)
+    private String externalSourceId;
+
+    @Column(name = "last_verified_at")
+    private OffsetDateTime lastVerifiedAt;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;

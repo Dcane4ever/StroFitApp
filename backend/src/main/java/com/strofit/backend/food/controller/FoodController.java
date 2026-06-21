@@ -55,14 +55,4 @@ public class FoodController {
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.ok(response));
     }
 
-    /**
-     * GET /barcodes/{barcode}
-     * Look up a product by barcode value.
-     * Returns 404 if not in the local DB — barcode enrichment pipeline is a later milestone.
-     */
-    @GetMapping("/barcodes/{barcode}")
-    public ResponseEntity<ApiResponse<BarcodeProductResponse>> getByBarcode(
-            @PathVariable String barcode) {
-        return ResponseEntity.ok(ApiResponse.ok(foodService.getByBarcode(barcode)));
-    }
 }
