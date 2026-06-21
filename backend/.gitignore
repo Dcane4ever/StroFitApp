@@ -1,0 +1,21 @@
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# Local dev config — never commit secrets
+src/main/resources/application-local.yml
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+
+# Maven wrapper
+.mvn/wrapper/maven-wrapper.jar
+
+# OS
+.DS_Store
+Thumbs.db
