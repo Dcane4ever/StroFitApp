@@ -18,4 +18,10 @@ public interface DiaryEntryItemRepository extends JpaRepository<DiaryEntryItem, 
 
     @Query("SELECT i FROM DiaryEntryItem i WHERE i.diaryEntry.userId = :userId AND i.diaryEntry.entryDate = :date")
     List<DiaryEntryItem> findByUserIdAndDate(@Param("userId") UUID userId, @Param("date") LocalDate date);
+
+    @Query("SELECT i FROM DiaryEntryItem i WHERE i.diaryEntry.userId = :userId " +
+           "AND i.diaryEntry.entryDate >= :start AND i.diaryEntry.entryDate <= :end")
+    List<DiaryEntryItem> findByUserIdInRange(@Param("userId") UUID userId,
+                                             @Param("start") LocalDate start,
+                                             @Param("end") LocalDate end);
 }
