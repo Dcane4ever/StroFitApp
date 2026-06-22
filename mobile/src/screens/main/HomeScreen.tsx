@@ -1,14 +1,16 @@
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, ScrollView, RefreshControl,
-  StyleSheet, SafeAreaView, ActivityIndicator,
+  StyleSheet, SafeAreaView, ActivityIndicator, TouchableOpacity,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { MainTabScreenProps } from '../../types/navigation';
 import { useThemeStore } from '../../store/themeStore';
-import { Spacing, Typography } from '../../theme';
-import { useDiaryDay } from '../../hooks/useDiaryDay';
-import { useDailyBudget } from '../../hooks/useDailyBudget';
+import { Spacing, Typography , AppColors } from '../../theme';
+import { useDiaryDay } from '../../hooks/queries/useDiaryDay';
+import { useDailyBudget } from '../../hooks/queries/useDailyBudget';
 import { MealType } from '../../types/diary';
+import { todayString, shiftDate } from '../../utils/date';
 import DateSwitcher from '../../components/diary/DateSwitcher';
 import MacroSummaryCard from '../../components/diary/MacroSummaryCard';
 import BudgetSummaryCard from '../../components/diary/BudgetSummaryCard';
@@ -18,16 +20,6 @@ type Props = MainTabScreenProps<'Home'>;
 
 const MEAL_ORDER: MealType[] = ['BREAKFAST', 'LUNCH', 'DINNER', 'SNACK'];
 
-function todayString(): string {
-  return new Date().toISOString().slice(0, 10);
-}
-
-function shiftDate(dateStr: string, days: number): string {
-  const d = new Date(dateStr + 'T00:00:00');
-  d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10);
-}
-
 export default function HomeScreen({ navigation }: Props) {
   const { colors } = useThemeStore();
   const [date, setDate] = useState(todayString);
@@ -35,20 +27,21 @@ export default function HomeScreen({ navigation }: Props) {
   const diary = useDiaryDay(date);
   const budget = useDailyBudget(date);
 
-  const isRefreshing = diary.loading || budget.loading;
+  // Background refetch on screen focus — no spinner if cached data is present
+  useFocusEffect(
+    useCallback(() => {
+      diary.refresh();
+      budget.refresh();
+    }, [date]) // eslint-disable-line react-hooks/exhaustive-deps
+  );
 
   const handleRefresh = useCallback(() => {
     diary.refresh();
     budget.refresh();
   }, [diary, budget]);
 
-  const handleAddFood = useCallback((mealType: MealType) => {
-    navigation.navigate('Search', { date, mealType });
-  }, [navigation, date]);
-
   const s = styles(colors);
 
-  // Build full meal list — always show all 4 meals even if empty
   const mealMap = new Map(diary.data?.meals.map(m => [m.mealType, m]));
   const allMeals = MEAL_ORDER.map(type => (
     mealMap.get(type) ?? {
@@ -62,6 +55,14 @@ export default function HomeScreen({ navigation }: Props) {
       totalCost: null,
     }
   ));
+
+  const handleAddFood = useCallback((mealType: MealType) => {
+    navigation.navigate('Search', { date, mealType });
+  }, [navigation, date]);
+
+  // isRefreshing drives the pull-to-refresh spinner —
+  // only show when both are fetching (covers initial load + manual refresh)
+  const isRefreshing = diary.isRefetching || budget.loading;
 
   return (
     <SafeAreaView style={s.root}>
@@ -78,14 +79,13 @@ export default function HomeScreen({ navigation }: Props) {
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
-            refreshing={isRefreshing && !diary.loading}
+            refreshing={isRefreshing}
             onRefresh={handleRefresh}
             tintColor={colors.primary}
             colors={[colors.primary]}
           />
         }
       >
-        {/* Macro card — always show, zeros if no data */}
         <MacroSummaryCard
           calories={diary.data?.totalCalories ?? 0}
           proteinG={diary.data?.totalProteinG ?? 0}
@@ -94,19 +94,21 @@ export default function HomeScreen({ navigation }: Props) {
           fiberG={diary.data?.totalFiberG ?? 0}
         />
 
-        {/* Budget card — only show if data available */}
         {budget.data != null && budget.data.budgetLimitPhp != null && (
           <BudgetSummaryCard budget={budget.data} />
         )}
 
-        {/* Error banner */}
+        {/* Soft error banner — show even if cached diary data is present */}
         {diary.error != null && (
           <View style={s.errorBanner}>
             <Text style={s.errorText}>{diary.error}</Text>
+            <TouchableOpacity onPress={handleRefresh} style={s.retryLink}>
+              <Text style={s.retryLinkText}>Retry</Text>
+            </TouchableOpacity>
           </View>
         )}
 
-        {/* Initial load spinner (first load only, not refresh) */}
+        {/* Initial load only (no cache yet) */}
         {diary.loading && diary.data == null ? (
           <View style={s.loadingCenter}>
             <ActivityIndicator color={colors.primary} size="large" />
@@ -127,7 +129,7 @@ export default function HomeScreen({ navigation }: Props) {
   );
 }
 
-const styles = (colors: ReturnType<typeof useThemeStore>['colors']) =>
+const styles = (colors: AppColors) =>
   StyleSheet.create({
     root: { flex: 1, backgroundColor: colors.background },
     scroll: { flex: 1 },
@@ -142,10 +144,21 @@ const styles = (colors: ReturnType<typeof useThemeStore>['colors']) =>
       backgroundColor: colors.error + '22',
       borderRadius: 8,
       padding: Spacing.sm,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
     },
     errorText: {
       color: colors.error,
       fontSize: Typography.sm,
+      flex: 1,
+    },
+    retryLink: { paddingLeft: Spacing.sm },
+    retryLinkText: {
+      color: colors.error,
+      fontSize: Typography.sm,
+      fontWeight: Typography.semibold,
+      textDecorationLine: 'underline',
     },
     bottomPad: { height: Spacing.xl },
   });

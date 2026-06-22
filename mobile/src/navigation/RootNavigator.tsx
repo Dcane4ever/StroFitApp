@@ -5,7 +5,7 @@ import { RootStackParamList } from '../types/navigation';
 import { useAuthStore } from '../store/authStore';
 import { useThemeStore } from '../store/themeStore';
 import AuthStack from './AuthStack';
-import MainTabs from './MainTabs';
+import MainStack from './MainStack';
 
 const Root = createNativeStackNavigator<RootStackParamList>();
 
@@ -28,7 +28,7 @@ export default function RootNavigator() {
   return (
     <Root.Navigator screenOptions={{ headerShown: false, animation: 'fade' }}>
       {token ? (
-        <Root.Screen name="Main" component={MainTabs} />
+        <Root.Screen name="Main" component={MainStack} />
       ) : (
         <Root.Screen name="Auth" component={AuthStack} />
       )}

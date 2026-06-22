@@ -4,6 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import RootNavigator from './src/navigation/RootNavigator';
 import { useThemeStore } from './src/store/themeStore';
+import QueryProvider from './src/providers/QueryProvider';
 
 function AppInner() {
   const { isDark, colors } = useThemeStore();
@@ -22,7 +23,9 @@ function AppInner() {
 export default function App() {
   return (
     <SafeAreaProvider>
-      <AppInner />
+      <QueryProvider>
+        <AppInner />
+      </QueryProvider>
     </SafeAreaProvider>
   );
 }

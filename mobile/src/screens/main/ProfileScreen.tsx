@@ -3,11 +3,11 @@ import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-na
 import { MainTabScreenProps } from '../../types/navigation';
 import { useThemeStore } from '../../store/themeStore';
 import { useAuthStore } from '../../store/authStore';
-import { Spacing, BorderRadius, Typography } from '../../theme';
+import { Spacing, BorderRadius, Typography , AppColors } from '../../theme';
 
 type Props = MainTabScreenProps<'Profile'>;
 
-export default function ProfileScreen(_props: Props) {
+export default function ProfileScreen({ navigation }: Props) {
   const { colors, isDark, toggleTheme } = useThemeStore();
   const { user, clearAuth } = useAuthStore();
   const s = styles(colors);
@@ -33,6 +33,40 @@ export default function ProfileScreen(_props: Props) {
         <Text style={s.rowValue}>{isDark ? 'Dark' : 'Light'}</Text>
       </TouchableOpacity>
 
+      <TouchableOpacity
+        style={s.row}
+        onPress={() => navigation.navigate('Recipes')}
+      >
+        <Text style={s.rowText}>My Recipes</Text>
+        <Text style={s.rowChevron}>›</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={s.row}
+        onPress={() => navigation.navigate('Planner')}
+      >
+        <Text style={s.rowText}>Planner & Budget</Text>
+        <Text style={s.rowChevron}>›</Text>
+      </TouchableOpacity>
+
+      {user?.role === 'COACH' || user?.role === 'ADMIN' ? (
+        <TouchableOpacity
+          style={s.row}
+          onPress={() => navigation.navigate('Coaching', { initialScreen: 'CoachDashboard' })}
+        >
+          <Text style={s.rowText}>My Trainees</Text>
+          <Text style={s.rowChevron}>›</Text>
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity
+          style={s.row}
+          onPress={() => navigation.navigate('Coaching', { initialScreen: 'MyCoach' })}
+        >
+          <Text style={s.rowText}>My Coach</Text>
+          <Text style={s.rowChevron}>›</Text>
+        </TouchableOpacity>
+      )}
+
       <TouchableOpacity style={s.logoutBtn} onPress={clearAuth}>
         <Text style={s.logoutText}>Log Out</Text>
       </TouchableOpacity>
@@ -40,7 +74,7 @@ export default function ProfileScreen(_props: Props) {
   );
 }
 
-const styles = (colors: ReturnType<typeof useThemeStore>['colors']) =>
+const styles = (colors: AppColors) =>
   StyleSheet.create({
     root: { flex: 1, backgroundColor: colors.background },
     header: { paddingHorizontal: Spacing.md, paddingTop: Spacing.md, paddingBottom: Spacing.sm },
@@ -60,6 +94,7 @@ const styles = (colors: ReturnType<typeof useThemeStore>['colors']) =>
     },
     rowText: { fontSize: Typography.base, color: colors.textPrimary },
     rowValue: { fontSize: Typography.base, color: colors.textSecondary },
+    rowChevron: { fontSize: 20, color: colors.textDisabled },
     logoutBtn: {
       marginHorizontal: Spacing.md, marginTop: Spacing.xl,
       backgroundColor: colors.error, borderRadius: BorderRadius.md,

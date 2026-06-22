@@ -6,7 +6,7 @@ import {
 import { AuthScreenProps } from '../../types/navigation';
 import { useThemeStore } from '../../store/themeStore';
 import { useAuthStore } from '../../store/authStore';
-import { Spacing, BorderRadius, Typography } from '../../theme';
+import { Spacing, BorderRadius, Typography , AppColors } from '../../theme';
 import apiClient from '../../api/client';
 
 type Props = AuthScreenProps<'Register'>;
@@ -80,7 +80,7 @@ export default function RegisterScreen({ navigation }: Props) {
   );
 }
 
-const styles = (colors: ReturnType<typeof useThemeStore>['colors']) =>
+const styles = (colors: AppColors) =>
   StyleSheet.create({
     root: { flex: 1, backgroundColor: colors.background },
     inner: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: Spacing.xl, paddingVertical: Spacing.xl },

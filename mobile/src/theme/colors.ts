@@ -1,52 +1,77 @@
-export const DarkColors = {
-  // Backgrounds
+export type AppColors = {
+  background: string;
+  surface: string;
+  surfaceElevated: string;
+  card: string;
+  primary: string;
+  primaryDark: string;
+  primaryLight: string;
+  accent: string;
+  textPrimary: string;
+  textSecondary: string;
+  textDisabled: string;
+  textInverse: string;
+  border: string;
+  borderFocus: string;
+  success: string;
+  warning: string;
+  error: string;
+  info: string;
+  calories: string;
+  protein: string;
+  carbs: string;
+  fat: string;
+  fiber: string;
+  tabBarBackground: string;
+  tabBarActive: string;
+  tabBarInactive: string;
+  overlay: string;
+  white: string;
+  black: string;
+  transparent: string;
+};
+
+export const DarkColors: AppColors = {
   background: '#0F0F0F',
   surface: '#1A1A1A',
   surfaceElevated: '#242424',
   card: '#1E1E1E',
 
-  // Brand
-  primary: '#4CAF50',       // green — health/fitness
+  primary: '#4CAF50',
   primaryDark: '#388E3C',
   primaryLight: '#81C784',
-  accent: '#FF6B35',        // orange — energy/cals
+  accent: '#FF6B35',
 
-  // Text
   textPrimary: '#F5F5F5',
   textSecondary: '#9E9E9E',
   textDisabled: '#555555',
   textInverse: '#0F0F0F',
 
-  // Borders
   border: '#2C2C2C',
   borderFocus: '#4CAF50',
 
-  // Status
   success: '#4CAF50',
   warning: '#FFC107',
   error: '#F44336',
   info: '#2196F3',
 
-  // Macros (consistent palette across app)
   calories: '#FF6B35',
   protein: '#2196F3',
   carbs: '#FFC107',
   fat: '#9C27B0',
   fiber: '#4CAF50',
 
-  // Tab bar
   tabBarBackground: '#141414',
   tabBarActive: '#4CAF50',
   tabBarInactive: '#555555',
 
-  // Misc
   overlay: 'rgba(0,0,0,0.7)',
   white: '#FFFFFF',
   black: '#000000',
   transparent: 'transparent',
-} as const;
+};
 
-export const LightColors: typeof DarkColors = {
+export const LightColors: AppColors = {
   background: '#F5F5F5',
   surface: '#FFFFFF',
   surfaceElevated: '#FAFAFA',
@@ -85,5 +110,3 @@ export const LightColors: typeof DarkColors = {
   black: '#000000',
   transparent: 'transparent',
 };
-
-export type AppColors = typeof DarkColors;

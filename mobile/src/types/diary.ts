@@ -41,3 +41,22 @@ export interface DiaryDayResponse {
   totalFiberG: number;
   totalCost: number | null;
 }
+
+export interface AddDiaryItemRequest {
+  date: string;
+  mealType: MealType;
+  foodItemId: string;
+  brandedProductId?: string | null;
+  servingUnitId: string;
+  quantity: number;
+  notes?: string | null;
+}
+
+export interface AddDiaryRecipeRequest {
+  date: string;
+  mealType: MealType;
+  recipeId: string;
+  servingOptionId: string;
+  quantity: number;
+  notes?: string | null;
+}

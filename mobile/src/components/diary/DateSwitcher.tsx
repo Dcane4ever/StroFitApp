@@ -1,10 +1,10 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useThemeStore } from '../../store/themeStore';
-import { Spacing, Typography, BorderRadius } from '../../theme';
+import { Spacing, Typography, BorderRadius , AppColors } from '../../theme';
 
 interface Props {
-  date: string;          // YYYY-MM-DD
+  date: string;
   onPrev: () => void;
   onNext: () => void;
   onToday: () => void;
@@ -14,53 +14,64 @@ function formatDisplayDate(dateStr: string): string {
   const d = new Date(dateStr + 'T00:00:00');
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const target = new Date(d);
-  target.setHours(0, 0, 0, 0);
-
-  const diff = (target.getTime() - today.getTime()) / 86400000;
+  const diff = (d.getTime() - today.getTime()) / 86400000;
   if (diff === 0) return 'Today';
   if (diff === -1) return 'Yesterday';
   if (diff === 1) return 'Tomorrow';
-
   return d.toLocaleDateString('en-PH', { weekday: 'short', month: 'short', day: 'numeric' });
 }
 
+function formatFullDate(dateStr: string): string {
+  return new Date(dateStr + 'T00:00:00')
+    .toLocaleDateString('en-PH', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+}
+
 function isToday(dateStr: string): boolean {
-  const today = new Date().toISOString().slice(0, 10);
-  return dateStr === today;
+  return dateStr === new Date().toISOString().slice(0, 10);
 }
 
 export default function DateSwitcher({ date, onPrev, onNext, onToday }: Props) {
   const { colors } = useThemeStore();
   const s = styles(colors);
+  const today = isToday(date);
 
   return (
     <View style={s.row}>
-      <TouchableOpacity style={s.arrow} onPress={onPrev} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+      <TouchableOpacity
+        style={s.arrow}
+        onPress={onPrev}
+        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+      >
         <Text style={s.arrowText}>‹</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={s.center} onPress={onToday} disabled={isToday(date)}>
-        <Text style={s.dateLabel}>{formatDisplayDate(date)}</Text>
-        <Text style={s.dateSubLabel}>
-          {new Date(date + 'T00:00:00').toLocaleDateString('en-PH', { month: 'long', day: 'numeric', year: 'numeric' })}
+      <TouchableOpacity style={s.center} onPress={onToday} disabled={today}>
+        <Text style={[s.dateLabel, today && { color: colors.primary }]}>
+          {formatDisplayDate(date)}
         </Text>
+        <Text style={s.dateSubLabel}>{formatFullDate(date)}</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={s.arrow} onPress={onNext} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+      <TouchableOpacity
+        style={s.arrow}
+        onPress={onNext}
+        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+      >
         <Text style={s.arrowText}>›</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
-const styles = (colors: ReturnType<typeof useThemeStore>['colors']) =>
+const styles = (colors: AppColors) =>
   StyleSheet.create({
     row: {
       flexDirection: 'row',
       alignItems: 'center',
       paddingHorizontal: Spacing.md,
       paddingVertical: Spacing.sm,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.border,
     },
     arrow: {
       width: 36,

@@ -8,3 +8,10 @@
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
 # Add any project specific keep options here:
+
+# react-native-vision-camera
+-keep class com.mrousavy.camera.** { *; }
+-keepclassmembers class com.mrousavy.camera.** { *; }
+
+# react-native-svg
+-keep public class com.horcrux.svg.** { *; }

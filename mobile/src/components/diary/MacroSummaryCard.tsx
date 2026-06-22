@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useThemeStore } from '../../store/themeStore';
-import { Spacing, Typography, BorderRadius } from '../../theme';
+import { Spacing, Typography, BorderRadius , AppColors } from '../../theme';
 
 interface Props {
   calories: number;
@@ -17,15 +17,17 @@ interface MacroPillProps {
   value: number;
   unit: string;
   color: string;
-  colors: ReturnType<typeof useThemeStore>['colors'];
+  colors: AppColors;
 }
 
 function MacroPill({ label, value, unit, color, colors }: MacroPillProps) {
   return (
     <View style={{ alignItems: 'center', flex: 1 }}>
-      <Text style={{ fontSize: Typography.md, fontWeight: Typography.bold, color }}>{value.toFixed(0)}</Text>
-      <Text style={{ fontSize: Typography.xs, color: colors.textSecondary, marginTop: 2 }}>{unit}</Text>
-      <Text style={{ fontSize: Typography.xs, color: colors.textDisabled, marginTop: 1 }}>{label}</Text>
+      <Text style={{ fontSize: Typography.md, fontWeight: Typography.bold, color }}>
+        {value.toFixed(0)}
+      </Text>
+      <Text style={{ fontSize: Typography.xs, color: colors.textDisabled, marginTop: 1 }}>{unit}</Text>
+      <Text style={{ fontSize: Typography.xs, color: colors.textSecondary, marginTop: 1 }}>{label}</Text>
     </View>
   );
 }
@@ -38,6 +40,9 @@ export default function MacroSummaryCard({ calories, proteinG, carbsG, fatG, fib
     ? Math.min(calories / calorieGoal, 1)
     : null;
 
+  const remaining = calorieGoal != null ? calorieGoal - calories : null;
+  const isOver = remaining != null && remaining < 0;
+
   return (
     <View style={s.card}>
       {/* Calorie headline */}
@@ -46,15 +51,23 @@ export default function MacroSummaryCard({ calories, proteinG, carbsG, fatG, fib
           <Text style={s.calValue}>{calories.toFixed(0)}</Text>
           <Text style={s.calUnit}> kcal</Text>
         </View>
-        {calorieGoal != null && (
-          <Text style={s.calGoal}>/ {calorieGoal.toFixed(0)} goal</Text>
+        {remaining != null && (
+          <View style={s.calRight}>
+            <Text style={[s.calRemaining, { color: isOver ? colors.error : colors.textSecondary }]}>
+              {isOver ? `${Math.abs(remaining).toFixed(0)} over` : `${remaining.toFixed(0)} left`}
+            </Text>
+            <Text style={s.calGoalLabel}>of {calorieGoal?.toFixed(0)} goal</Text>
+          </View>
         )}
       </View>
 
       {/* Progress bar */}
       {progressPct != null && (
         <View style={s.progressTrack}>
-          <View style={[s.progressFill, { width: `${progressPct * 100}%` }]} />
+          <View style={[
+            s.progressFill,
+            { width: `${progressPct * 100}%`, backgroundColor: isOver ? colors.error : colors.primary },
+          ]} />
         </View>
       )}
 
@@ -76,11 +89,12 @@ export default function MacroSummaryCard({ calories, proteinG, carbsG, fatG, fib
   );
 }
 
-const styles = (colors: ReturnType<typeof useThemeStore>['colors']) =>
+const styles = (colors: AppColors) =>
   StyleSheet.create({
     card: {
       marginHorizontal: Spacing.md,
-      marginVertical: Spacing.sm,
+      marginTop: Spacing.xs,
+      marginBottom: Spacing.sm,
       backgroundColor: colors.surface,
       borderRadius: BorderRadius.lg,
       padding: Spacing.md,
@@ -88,12 +102,12 @@ const styles = (colors: ReturnType<typeof useThemeStore>['colors']) =>
     calRow: {
       flexDirection: 'row',
       alignItems: 'flex-end',
+      justifyContent: 'space-between',
       marginBottom: Spacing.xs,
     },
     calLeft: {
       flexDirection: 'row',
       alignItems: 'flex-end',
-      flex: 1,
     },
     calValue: {
       fontSize: Typography.xxxl,
@@ -106,10 +120,18 @@ const styles = (colors: ReturnType<typeof useThemeStore>['colors']) =>
       color: colors.textSecondary,
       marginBottom: 4,
     },
-    calGoal: {
+    calRight: {
+      alignItems: 'flex-end',
+      paddingBottom: 2,
+    },
+    calRemaining: {
       fontSize: Typography.sm,
+      fontWeight: Typography.semibold,
+    },
+    calGoalLabel: {
+      fontSize: Typography.xs,
       color: colors.textDisabled,
-      alignSelf: 'flex-end',
+      marginTop: 1,
     },
     progressTrack: {
       height: 4,
@@ -120,14 +142,13 @@ const styles = (colors: ReturnType<typeof useThemeStore>['colors']) =>
     },
     progressFill: {
       height: 4,
-      backgroundColor: colors.calories,
       borderRadius: BorderRadius.full,
     },
     pillRow: {
       flexDirection: 'row',
       alignItems: 'center',
       paddingTop: Spacing.sm,
-      borderTopWidth: 1,
+      borderTopWidth: StyleSheet.hairlineWidth,
       borderTopColor: colors.border,
     },
     divider: {

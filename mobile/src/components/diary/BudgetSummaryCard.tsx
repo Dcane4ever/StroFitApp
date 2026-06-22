@@ -1,8 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useThemeStore } from '../../store/themeStore';
-import { Spacing, Typography, BorderRadius } from '../../theme';
+import { Spacing, Typography, BorderRadius , AppColors } from '../../theme';
 import { DailyBudgetSummaryResponse } from '../../types/budget';
+import { formatPeso, formatPesoCompact } from '../../utils/currency';
 
 interface Props {
   budget: DailyBudgetSummaryResponse;
@@ -19,16 +20,16 @@ export default function BudgetSummaryCard({ budget }: Props) {
   return (
     <View style={s.card}>
       <View style={s.headerRow}>
-        <Text style={s.title}>Budget</Text>
+        <Text style={s.title}>Daily Budget</Text>
         {budget.budgetLimitPhp != null && (
-          <Text style={s.limit}>₱{budget.budgetLimitPhp.toFixed(2)}</Text>
+          <Text style={s.limit}>{formatPeso(budget.budgetLimitPhp)} limit</Text>
         )}
       </View>
 
       <View style={s.amountsRow}>
         <View style={s.amountItem}>
-          <Text style={[s.amountValue, { color: colors.textPrimary }]}>
-            ₱{budget.totalSpentPhp.toFixed(2)}
+          <Text style={[s.amountValue, { color: isOverBudget ? colors.error : colors.textPrimary }]}>
+            {formatPeso(budget.totalSpentPhp)}
           </Text>
           <Text style={s.amountLabel}>Spent</Text>
         </View>
@@ -36,9 +37,9 @@ export default function BudgetSummaryCard({ budget }: Props) {
         {budget.remainingPhp != null && (
           <View style={s.amountItem}>
             <Text style={[s.amountValue, { color: isOverBudget ? colors.error : colors.success }]}>
-              {isOverBudget ? '-' : ''}₱{Math.abs(budget.remainingPhp).toFixed(2)}
+              {formatPesoCompact(budget.remainingPhp)}
             </Text>
-            <Text style={s.amountLabel}>{isOverBudget ? 'Over' : 'Left'}</Text>
+            <Text style={s.amountLabel}>{isOverBudget ? 'Over' : 'Remaining'}</Text>
           </View>
         )}
 
@@ -57,11 +58,15 @@ export default function BudgetSummaryCard({ budget }: Props) {
           <View style={[s.progressFill, { width: `${pct * 100}%`, backgroundColor: barColor }]} />
         </View>
       )}
+
+      {isOverBudget && (
+        <Text style={[s.overHint, { color: colors.error }]}>Over daily budget</Text>
+      )}
     </View>
   );
 }
 
-const styles = (colors: ReturnType<typeof useThemeStore>['colors']) =>
+const styles = (colors: AppColors) =>
   StyleSheet.create({
     card: {
       marginHorizontal: Spacing.md,
@@ -77,23 +82,22 @@ const styles = (colors: ReturnType<typeof useThemeStore>['colors']) =>
       marginBottom: Spacing.sm,
     },
     title: {
-      fontSize: Typography.sm,
+      fontSize: Typography.xs,
       fontWeight: Typography.semibold,
       color: colors.textSecondary,
       textTransform: 'uppercase',
       letterSpacing: 0.8,
     },
     limit: {
-      fontSize: Typography.sm,
-      color: colors.textSecondary,
+      fontSize: Typography.xs,
+      color: colors.textDisabled,
     },
     amountsRow: {
       flexDirection: 'row',
+      gap: Spacing.xl,
       marginBottom: Spacing.sm,
     },
-    amountItem: {
-      marginRight: Spacing.xl,
-    },
+    amountItem: {},
     amountValue: {
       fontSize: Typography.lg,
       fontWeight: Typography.bold,
@@ -112,5 +116,10 @@ const styles = (colors: ReturnType<typeof useThemeStore>['colors']) =>
     progressFill: {
       height: 4,
       borderRadius: BorderRadius.full,
+    },
+    overHint: {
+      fontSize: Typography.xs,
+      marginTop: Spacing.xs,
+      fontWeight: Typography.medium,
     },
   });

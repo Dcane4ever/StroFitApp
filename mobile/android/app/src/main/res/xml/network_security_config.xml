@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Allows cleartext HTTP to local development servers only.
+
+  10.0.2.2     = Android emulator loopback to host machine (localhost:port)
+  10.0.3.2     = Genymotion emulator loopback
+  192.168.x.x  = Physical device on LAN — add your machine's IP here if testing on device
+                 e.g. <domain includeSubdomains="false">192.168.1.42</domain>
+
+  Production traffic uses HTTPS only (base-config blocks cleartext).
+-->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">10.0.2.2</domain>
+        <domain includeSubdomains="false">10.0.3.2</domain>
+        <!-- Add your LAN IP here for physical device dev, e.g.: -->
+        <!-- <domain includeSubdomains="false">192.168.1.42</domain> -->
+    </domain-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

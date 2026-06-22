@@ -11,3 +11,21 @@ export interface DailyBudgetSummaryResponse {
   percentUsed: number | null;
   mealBreakdown: MealBudgetBreakdown[];
 }
+
+export interface DailySpendEntry {
+  date: string;
+  totalSpentPhp: number;
+  budgetLimitPhp: number | null;
+  overBudget: boolean;
+}
+
+export interface BudgetRangeSummaryResponse {
+  startDate: string;
+  endDate: string;
+  totalSpentPhp: number;
+  averageDailySpendPhp: number;
+  daysOverBudget: number;
+  totalDays: number;
+  budgetLimitPhp: number | null;
+  dailyEntries: DailySpendEntry[];
+}
